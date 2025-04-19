@@ -17,32 +17,36 @@ output.mkdir(exist_ok=True)
 
 async def run():
     # enable scrapfly cache for basic use
-    yelp.BASE_CONFIG["cache"] = False
+    # yelp.BASE_CONFIG["cache"] = False
 
     print("running Yelp scrape and saving results to ./results directory")
 
-    business_data = await yelp.scrape_pages(
-        urls=[
-            "https://www.yelp.com/biz/vons-1000-spirits-seattle-4",
-            "https://www.yelp.com/biz/ihop-seattle-4",
-            "https://www.yelp.com/biz/toulouse-petit-kitchen-and-lounge-seattle",
-        ]
-    )
-    with open(output.joinpath("business_pages.json"), "w", encoding="utf-8") as file:
-        json.dump(business_data, file, indent=2, ensure_ascii=False)
+    # business_data = await yelp.scrape_pages(
+    #     urls=[
+    #         "https://www.yelp.com/biz/smooth-air-brampton",
+    #         # "https://www.yelp.com/biz/vons-1000-spirits-seattle-4",
+    #         # "https://www.yelp.com/biz/ihop-seattle-4",
+    #         # "https://www.yelp.com/biz/toulouse-petit-kitchen-and-lounge-seattle",
+    #     ]
+    # )
+    # with open(output.joinpath("business_pages.json"), "w", encoding="utf-8") as file:
+    #     json.dump(business_data, file, indent=2, ensure_ascii=False)
 
-    reviews_data = await yelp.scrape_reviews(
-        url="https://www.yelp.com/biz/vons-1000-spirits-seattle-4",
-        # each 10 reviews represent a review page (one request)
-        max_reviews=28,
-    )
-    with open(output.joinpath("reviews.json"), "w", encoding="utf-8") as file:
-        json.dump(reviews_data, file, indent=2, ensure_ascii=False)
+    # reviews_data = await yelp.scrape_reviews(
+    #     # url="https://www.yelp.com/biz/smooth-air-brampton",
+    #     url="https://www.yelp.com/biz/maguires-brampton",
+    #     # each 10 reviews represent a review page (one request)
+    #     max_reviews=28,
+    # )
+    
+    # print(reviews_data)
+    # with open(output.joinpath("reviews.json"), "w", encoding="utf-8") as file:
+    #     json.dump(reviews_data, file, indent=2, ensure_ascii=False)
 
     search_data = await yelp.scrape_search(
-        keyword="plumbers", location="Seattle, WA", max_pages=2
+        keyword="plumbers", location="", max_pages=2
     )
-    with open(output.joinpath("search.json"), "w", encoding="utf-8") as file:
+    with open(output.joinpath("search2.json"), "w", encoding="utf-8") as file:
         json.dump(search_data, file, indent=2, ensure_ascii=False)
 
 

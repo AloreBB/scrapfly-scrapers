@@ -16,7 +16,7 @@ from urllib.parse import urlencode
 from loguru import logger as log
 from scrapfly import ScrapeConfig, ScrapflyClient, ScrapeApiResponse
 
-SCRAPFLY = ScrapflyClient(key=os.environ["SCRAPFLY_KEY"])
+SCRAPFLY = ScrapflyClient(key=os.environ["SCRAPFLY_KEY"], debug=True)
 
 BASE_CONFIG = {
     # bypass yelp.com web scraping blocking
@@ -68,9 +68,17 @@ def parse_business_id(response: ScrapeApiResponse):
 
 def parse_review_data(response: ScrapeApiResponse):
     """parse review data from the JSON response"""
-    data = json.loads(response.scrape_result["content"])
+    content = response.scrape_result.get("content", "")
+
+    if not content:
+        raise ValueError("La respuesta de la API está vacía o no contiene datos.")
+
+    data = json.loads(content)
+
     reviews = data[0]["data"]["business"]["reviews"]["edges"]
+    print("Reviews", len(reviews))
     parsed_reviews = []
+
     for review in reviews:
         result = jmespath.search(
             """{
@@ -184,7 +192,11 @@ async def scrape_reviews(url: str, max_reviews: int = None) -> List[Review]:
 
     log.info("scraping the first review page")
     first_page = await request_reviews_api(url=url, business_id=business_id, start_index=1)
+
     review_data = parse_review_data(first_page)
+
+    print("Info de las reviews", review_data)
+
     reviews = review_data["reviews"]
     total_reviews = review_data["total_reviews"]
 
@@ -216,11 +228,8 @@ async def scrape_search(keyword: str, location: str, max_pages: int = None):
         # final url example:
         # https://www.yelp.com/search?find_desc=plumbers&find_loc=Seattle%2C+WA&start=1
 
-
     log.info("scraping the first search page")
-    first_page = await SCRAPFLY.async_scrape(
-        ScrapeConfig(make_search_url(1), **BASE_CONFIG, render_js=True)
-    )
+    first_page = await SCRAPFLY.async_scrape(ScrapeConfig(make_search_url(1), **BASE_CONFIG, render_js=True))
     data = parse_search(first_page)
     search_data = data["search_data"]
     total_results = data["total_results"]
