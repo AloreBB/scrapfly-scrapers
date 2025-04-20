@@ -66,9 +66,9 @@ def parse_business_id(response: ScrapeApiResponse):
     return business_id
 
 
-def parse_review_data(response: ScrapeApiResponse):
+def parse_review_data(response: dict):
     """parse review data from the JSON response"""
-    content = response.scrape_result.get("content", "")
+    content = response
 
     if not content:
         raise ValueError("La respuesta de la API está vacía o no contiene datos.")
@@ -127,13 +127,13 @@ async def scrape_pages(urls: List[str]) -> List[Dict]:
     return result
 
 
-async def request_reviews_api(url: str, start_index: int, business_id):
+async def request_reviews_api(url: str, business_id, start_index: int = 1):
     """request the graphql API for review data"""
     pagionation_data = {"version": 1, "type": "offset", "offset": start_index}
     pagionation_data = json.dumps(pagionation_data)
     after = base64.b64encode(pagionation_data.encode("utf-8")).decode(
         "utf-8"
-    )  # decode the pagination values for the payload
+    ) if start_index != 1 else None  # decode the pagination values for the payload
 
     payload = json.dumps(
         [
